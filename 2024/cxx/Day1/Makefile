@@ -5,5 +5,5 @@ EXE=main
 all:
 	${CXX} ${CXX_FLAGS} ${EXE}.cpp -o ${EXE} 
 
-debug:
-	gdb --args ./${EXE} --tui
+dbg:
+	gdb --args ./${EXE}
