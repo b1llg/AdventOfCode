@@ -9,6 +9,30 @@ bool is_respecting_increase_decrease_rule(int n)
     return (n == 0 || abs(n) > 3) ? true : false;
 }
 
+std::vector<int>::iterator change_rule(std::vector<int> seq, bool is_increasing)
+{
+    auto viter = seq.begin();
+
+    for (; viter != seq.end(); ++viter)
+    {
+        // check the change between next iterator
+
+        int change = *(viter + 1) - *viter;
+
+        if (!is_respecting_increase_decrease_rule)
+            return viter; // means it changed direction
+
+        bool change_rule = is_respecting_increase_decrease_rule(change);
+
+        if (!change_rule)
+        {
+            return viter; // means that it did not reached end thus an error happened
+        }
+    }
+
+    return seq.end(); // Return end means the sequence is good
+}
+
 bool change_by_n(std::vector<int> seq)
 {
     /*
@@ -26,17 +50,17 @@ bool change_by_n(std::vector<int> seq)
     for (long unsigned int i = 1; i < seq.size(); i++)
     {
         // 1) check the change of direction
-        int ni = seq.at(i) - seq.at(i-1);
+        int ni = seq.at(i) - seq.at(i - 1);
 
         bool increase2 = ni > 0 ? true : false;
 
-        if (increase !=  increase2)
+        if (increase != increase2)
             return false; // quit because its changing direction
 
         // 2) check the increase size
 
         if (is_respecting_increase_decrease_rule(ni))
-            return false; // means that it does not respect the rules 
+            return false; // means that it does not respect the rules
     }
 
     return true; // if it gets here it means it as respected all condition
@@ -44,39 +68,28 @@ bool change_by_n(std::vector<int> seq)
     // means increase was
 }
 
-std::vector<int>::iterator change_by_n2(std::vector<int> seq)
+std::vector<int>::iterator change_by_n2(std::vector<int> &seq)
 {
-    /*
-            Determine n, either -2,-1,1,2 or 3
-    */
+    // check increase or decrease with begin and end
+    bool is_increasing = *(seq.end()) > *(seq.begin()) ? true : false; //! Potentially an error if the first one is the one to remove (either too large or too small, same for the last one)
 
-    int n = *(seq.begin() + 1) - *(seq.begin());
+    auto seqiter = change_rule(seq, is_increasing);
 
-    if (is_respecting_increase_decrease_rule(n))
-        return seq.begin(); // means that it does not respect the rules
-
-    // Now check that it is either increasing or decreasing
-    bool increase = n > 0 ? true : false;
-
-    for (auto viter = seq.begin() + 1; viter != seq.end(); ++viter)
+    if (seqiter == seq.end())
     {
-        // 1) check the change of direction
-        int ni = *viter - *(viter-1);
-
-        bool increase2 = ni > 0 ? true : false;
-
-        if (increase !=  increase2)
-            return viter-1; // quit because its changing direction
-
-        // 2) check the increase size
-
-        if (is_respecting_increase_decrease_rule(ni))
-            return viter-1; // means that it does not respect the rules 
+        return seq.end();
     }
+    else
+    {
+        // damper
+        std::remove(seq.begin(), seq.end(), seqiter);
 
-    return seq.end(); // if it gets here it means it as respected all condition
+        // call change rule again
 
-    // means increase was
+        seqiter = change_rule(seq, is_increasing);
+
+        return seqiter;
+    }
 }
 
 int main()
@@ -104,18 +117,14 @@ int main()
         // Remove id, use the change_by_n function
         // vint.erase(vint.begin());
 
-        if (change_by_n2(vint) == vint.end())
+        // if (change_by_n2(vint) == vint.end())
+        if (change_by_n2(vint) != vint.end())
         {
             safe++;
             std::cout << "line#:" << line_num << std::endl;
         }
-        else // try one more time returning the seq without the problematic level
-        {
-            std::cout << "damper success" << std::endl;
-        }
 
         line_num++;
-
     }
 
     std::cout << "Safe count: " << safe << std::endl;
